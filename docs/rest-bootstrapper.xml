@@ -1,0 +1,72 @@
+<bootstrapper>
+	<end-point-list>
+		<end-point>
+			<name>Add new file</name>
+			<url>/create/file</url>
+			<method>POST</method>
+			<desc>Add a new file to</desc>
+			<type>MongoDB</type>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+				<body-param>uuid</body-param>
+				<body-param>path</body-param>
+				<body-param>basename</body-param>
+				<body-param>desc</body-param>
+				<body-param>mode</body-param>
+				<body-param>inode</body-param>
+				<body-param>dev</body-param>
+				<body-param>nlink</body-param>
+				<body-param>uid</body-param>
+				<body-param>gid</body-param>
+				<body-param>owner</body-param>
+				<body-param>group</body-param>
+				<body-param>bytes_size</body-param>
+				<body-param>atime</body-param>
+				<body-param>mtime</body-param>
+				<body-param>ctime</body-param>
+				<body-param>date_accessed</body-param>
+				<body-param>date_modified</body-param>
+				<body-param>date_created</body-param>
+				<body-param>publisher</body-param>
+				<body-param>createAt</body-param>
+				<body-param>md5checksum</body-param>
+			</body-parameters-list>
+			<target-collections>
+				<collection>files</collection>
+			</target-collections>
+		</end-point>
+		<end-point>
+			<name>Get files unique identifier list</name>			
+			<url>/file_uuid_list/</url>
+			<method>GET</method>
+			<desc>Retrieve list of file unique identifiers.</desc>
+			<type>MongoDB</type>
+			<expiry>0</expiry>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
+			<sql><![CDATA[
+				db.files.find({},{uuid:1})
+				]]>					
+			</sql>
+		</end-point>
+		<end-point>
+			<name>Get file details by unique identifier</name>			
+			<url>/file/:uuid</url>
+			<method>GET</method>
+			<desc>Retrieve file details by unique identifier.</desc>
+			<type>MongoDB</type>
+			<expiry>0</expiry>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
+			<sql><![CDATA[
+				db.files.find({uuid:1})
+				]]>					
+			</sql>
+		</end-point>
+	</end-point-list>
+</bootstrapper>

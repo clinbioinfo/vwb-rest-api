@@ -140,7 +140,8 @@ sub _initConnection {
 sub add_new_file{
 
 	my $self = shift;
-	my ($username, $password, $uuid, $path, $basename, $desc, $mode, $inode, $dev, $nlink, $uid, $gid, $owner, $group, $bytes_size, $atime, $mtime, $ctime, $date_accessed, $date_modified, $date_created, $publisher, $createAt, $md5checksum) = @_;
+	# my ($username, $password, $uuid, $path, $basename, $desc, $mode, $inode, $dev, $nlink, $uid, $gid, $owner, $group, $bytes_size, $atime, $mtime, $ctime, $date_accessed, $date_modified, $date_created, $publisher, $createAt, $md5checksum) = @_;
+	my ($uuid, $path, $basename, $desc, $mode, $inode, $dev, $nlink, $uid, $gid, $owner, $group, $bytes_size, $atime, $mtime, $ctime, $date_accessed, $date_modified, $date_created, $publisher, $createAt, $md5checksum, $hostname) = @_;
 
 	# if (!defined($username)){
 	# 	$self->{_logger}->logconfess("$username was not defined");
@@ -150,92 +151,155 @@ sub add_new_file{
 	# 	$self->{_logger}->logconfess("$password was not defined");
 	# }
 
+	my $lookup = {};
+
 	if (!defined($uuid)){
 		$self->{_logger}->logconfess("$uuid was not defined");
+	}
+	else {
+		$lookup->{'uuid'} = $uuid;
 	}
 
 	if (!defined($path)){
 		$self->{_logger}->logconfess("$path was not defined");
 	}
+	else {
+		$lookup->{'path'} = $path;
+	}
 
 	if (!defined($basename)){
 		$self->{_logger}->logconfess("$basename was not defined");
 	}
+	else {
+		$lookup->{'basename'} = $basename;
+	}
+
 
 	if (!defined($desc)){
 		$self->{_logger}->logconfess("$desc was not defined");
+	}
+	else {
+		$lookup->{'desc'} = $desc;
 	}
 
 	if (!defined($mode)){
 		$self->{_logger}->logconfess("$mode was not defined");
 	}
+	else {
+		$lookup->{'mode'} = $mode;
+	}
 
 	if (!defined($inode)){
 		$self->{_logger}->logconfess("$inode was not defined");
+	}
+	else {
+		$lookup->{'inode'} = $inode;
 	}
 
 	if (!defined($dev)){
 		$self->{_logger}->logconfess("$dev was not defined");
 	}
+	else {
+		$lookup->{'dev'} = $dev;
+	}
 
 	if (!defined($nlink)){
 		$self->{_logger}->logconfess("$nlink was not defined");
+	}
+	else {
+		$lookup->{'nlink'} = $nlink;
 	}
 
 	if (!defined($uid)){
 		$self->{_logger}->logconfess("$uid was not defined");
 	}
+	else {
+		$lookup->{'uid'} = $uid;
+	}
 
 	if (!defined($gid)){
 		$self->{_logger}->logconfess("$gid was not defined");
+	}
+	else {
+		$lookup->{'gid'} = $gid;
 	}
 
 	if (!defined($owner)){
 		$self->{_logger}->logconfess("$owner was not defined");
 	}
+	else {
+		$lookup->{'owner'} = $owner;
+	}
 
 	if (!defined($group)){
 		$self->{_logger}->logconfess("$group was not defined");
+	}
+	else {
+		$lookup->{'group'} = $group;
 	}
 
 	if (!defined($bytes_size)){
 		$self->{_logger}->logconfess("$bytes_size was not defined");
 	}
+	else {
+		$lookup->{'bytes_size'} = $bytes_size;
+	}
 
 	if (!defined($atime)){
 		$self->{_logger}->logconfess("$atime was not defined");
+	}
+	else {
+		$lookup->{'atime'} = $atime;
 	}
 
 	if (!defined($mtime)){
 		$self->{_logger}->logconfess("$mtime was not defined");
 	}
+	else {
+		$lookup->{'mtime'} = $mtime;
+	}
 
 	if (!defined($ctime)){
 		$self->{_logger}->logconfess("$ctime was not defined");
+	}
+	else {
+		$lookup->{'ctime'} = $ctime;
 	}
 
 	if (!defined($date_accessed)){
 		$self->{_logger}->logconfess("$date_accessed was not defined");
 	}
+	else {
+		$lookup->{'date_accessed'} = $date_accessed;
+	}
 
 	if (!defined($date_modified)){
 		$self->{_logger}->logconfess("$date_modified was not defined");
+	}
+	else {
+		$lookup->{'date_modified'} = $date_modified;
 	}
 
 	if (!defined($date_created)){
 		$self->{_logger}->logconfess("$date_created was not defined");
 	}
+	else {
+		$lookup->{'date_created'} = $date_created;
+	}
 
 	if (!defined($publisher)){
-		$self->{_logger}->logconfess("$publisher was not defined");
+		$self->{_logger}->info("$publisher was not defined");
+	}
+	else {
+		$lookup->{'publisher'} = $publisher;
 	}
 
-	if (!defined($createAt)){
-		$self->{_logger}->logconfess("$createAt was not defined");
-	}
 
 	if (!defined($md5checksum)){
 		$self->{_logger}->logconfess("$md5checksum was not defined");
+	}
+	else {
+		$lookup->{'checksum'} = $md5checksum;
 	}
 
 	## Add a new file to
@@ -246,8 +310,17 @@ sub add_new_file{
 		$self->{_logger}->logconfess("Could not collection 'files'");
 	}
 
-	
-	return $collection->insert({});
+	my $result = $collection->insert_one($lookup);
+	if (!defined($result)){
+		$self->{_logger}->logconfess("result was not defined");
+	}
+
+	if (! $result->acknowledged){
+		$self->{_logger}->logconfess("The insert_one was not acknowledged for document : " . Dumper $lookup);
+	}
+	else {
+		return $lookup;
+	}
 
 }
 
@@ -327,6 +400,8 @@ sub get_file_details_by_unique_identifier{
 	my $doc = $cursor->next();
 
 	if (defined($doc)){
+
+		delete $doc->{'_id'};
 
 		return $doc;
 	}

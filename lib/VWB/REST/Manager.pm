@@ -7,6 +7,7 @@ use File::Path;
 use FindBin;
 use File::Slurp;
 use Term::ANSIColor;
+use Digest::MD5 qw(md5_hex);
 
 use VWB::REST::Logger;
 use VWB::REST::Config::Manager;
@@ -223,6 +224,37 @@ sub get_file_details_by_unique_identifier{
     return $self->{_dbutil}->get_file_details_by_unique_identifier(@_);
 };
 
+
+sub getUUID {
+
+    my $self = shift;
+    my ($checksum, $path, $host) = @_;
+
+    if (!defined($checksum)){
+        $self->{_logger}->logconfess("checksum was not defined");
+    }
+
+    if (!defined($path)){
+        $self->{_logger}->logconfess("path was not defined");
+    }
+
+
+    if (!defined($host)){
+        $self->{_logger}->logconfess("host was not defined");
+    }
+
+    my $str = $checksum . '_' . $path . '_' . $host;
+
+    my $uuid = md5_hex($str);
+    if (!defined($uuid)){
+        $self->{_logger}->logconfess("uuid was not defined for str '$str'");
+    }
+
+    $self->{_logger}->info("Created uuid '$uuid' for checksum '$checksum' path '$path' host '$host'");
+
+    return $uuid;
+
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
